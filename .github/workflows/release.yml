@@ -1,0 +1,38 @@
+name: Build image and release
+
+on:
+  push:
+    tags:
+      - '*'
+
+jobs:
+  build-docker:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+      - name: Use Node.js 12.x
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+      - name: Get npm cache directory
+        id: npm-cache
+        run: |
+          echo "::set-output name=dir::$(npm config get cache)"
+      - uses: actions/cache@v1
+        with:
+          path: ${{ steps.npm-cache.outputs.dir }}
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-node-
+      - name: npm install and build
+        run: |
+          npm ci
+          npm run build-ts
+        env:
+          CI: true
+      - name: Get the tag
+        id: get_tag
+        run: echo ::set-output name=TAG::$(echo $GITHUB_REF | cut -d / -f 3)    
+      - name: build Docker image
+        run: docker build -t service-typescript:${{ steps.get_tag.outputs.TAG }} .
