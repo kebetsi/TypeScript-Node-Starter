@@ -34,5 +34,13 @@ jobs:
       - name: Get the tag
         id: get_tag
         run: echo ::set-output name=TAG::$(echo $GITHUB_REF | cut -d / -f 3)    
+      - name: Login to the docker registry
+        uses: azure/docker-login@v1
+        with:
+          #login-server: ${{ secrets.REGISTRY_KEBETSI2_SERVER }} # default: index.docker.io
+          username: ${{ secrets.REGISTRY_KEBETSI2_USERNAME }}
+          password: ${{ secrets.REGISTRY_KEBETSI2_PASSWORD }}
       - name: build Docker image
         run: docker build -t service-typescript:${{ steps.get_tag.outputs.TAG }} .
+      - name: push Docker image
+        run: docker push kebetsi2/service-typescript:${{ steps.get_tag.outputs.TAG }}
