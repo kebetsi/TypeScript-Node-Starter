@@ -1,3 +1,5 @@
+# inspired from https://gist.github.com/zmts/509f224950f85f3cfe4365e2b80081d1#dockerfile
+
 FROM node:12-alpine
 
 # update packages
